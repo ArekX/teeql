@@ -5,6 +5,7 @@ import { query } from "../query";
 const commaGlue = query`, `;
 const andGlue = query` AND `;
 const orGlue = query` OR `;
+const unionGlue = query` UNION `;
 
 export const generalSqlDialect: Dialect = {
   getParameterName: (paramProperyName: string): string =>
@@ -15,4 +16,5 @@ export const generalSqlDialect: Dialect = {
   getCommaGlue: () => commaGlue,
   getAndGlue: () => andGlue,
   getOrGlue: () => orGlue,
+  getUnionGlue: () => unionGlue,
 };

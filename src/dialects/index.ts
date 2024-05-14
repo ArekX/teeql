@@ -8,6 +8,7 @@ export interface Dialect {
   getCommaGlue(): SourceQuery;
   getAndGlue(): SourceQuery;
   getOrGlue(): SourceQuery;
+  getUnionGlue(): SourceQuery;
 }
 
 export * from "./general-sql";

@@ -5,6 +5,7 @@ import {
   GlueQuery,
   OrGlueQuery,
   SourceQuery,
+  UnionGlueQuery,
 } from "./query";
 
 export const glue = (glue: SourceQuery, queries: SourceQuery[]) =>
@@ -18,6 +19,9 @@ export const glueOr = (...conditions: SourceQuery[]) =>
 
 export const glueComma = (...conditions: SourceQuery[]) =>
   new CommaGlueQuery(conditions);
+
+export const glueUnion = (...conditions: SourceQuery[]) =>
+  new UnionGlueQuery(conditions);
 
 type OperatorValue<T> = T | (() => T);
 
@@ -39,9 +43,9 @@ export const when = (
 export const match = (
   ...conditions: [OperatorValue<boolean>, OperatorValue<SourceQuery>][]
 ): SourceQuery => {
-  for (const condition of conditions) {
-    if (resolve<boolean>(condition[0])) {
-      return resolve<SourceQuery>(condition[1]);
+  for (const [predicate, resultValue] of conditions) {
+    if (resolve<boolean>(predicate)) {
+      return resolve<SourceQuery>(resultValue);
     }
   }
 

@@ -35,6 +35,12 @@ export class CommaGlueQuery extends GlueQuery {
   }
 }
 
+export class UnionGlueQuery extends GlueQuery {
+  getGlue(dialect: Dialect) {
+    return dialect.getUnionGlue();
+  }
+}
+
 export const query = (
   queryParts: TemplateStringsArray,
   ...params: any[]
