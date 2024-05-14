@@ -1,6 +1,6 @@
-import { commaGlue, emptyQuery } from "../query-builder";
+import { Dialect } from "./dialects";
 import { ParameterBuilder } from "./parameter-builder";
-import { Query } from "./query";
+import { GlueQuery, PartsQuery, SourceQuery } from "./query";
 
 export interface CompiledQuery {
   sql: string;
@@ -8,7 +8,22 @@ export interface CompiledQuery {
 }
 
 export const compile = (
-  query: Query,
+  query: SourceQuery,
+  dialect: Dialect,
+  parameters: ParameterBuilder
+): CompiledQuery | null => {
+  if (query instanceof PartsQuery) {
+    return compilePartsQuery(query, dialect, parameters);
+  } else if (query instanceof GlueQuery) {
+    return compileGlueQuery(query, dialect, parameters);
+  }
+
+  return null;
+};
+
+const compilePartsQuery = (
+  query: PartsQuery,
+  dialect: Dialect,
   parameters: ParameterBuilder
 ): CompiledQuery | null => {
   if (query.parts.length === 0) {
@@ -23,7 +38,7 @@ export const compile = (
       continue;
     }
 
-    const value = parseParameter(query.params[i], parameters);
+    const value = compileParameter(query.params[i], dialect, parameters);
 
     if (value === null) {
       continue;
@@ -34,21 +49,69 @@ export const compile = (
 
   return {
     sql: parts.join(""),
-    params: parameters.parameters,
+    params: dialect.toPreparedParameters(parameters),
   };
 };
 
-const parseParameter = (
-  paramValue: any,
+const compileGlueQuery = (
+  glueQuery: GlueQuery,
+  dialect: Dialect,
+  parameters: ParameterBuilder
+): CompiledQuery | null => {
+  const compiledParts = [];
+  for (const query of glueQuery.queries) {
+    const compiled = compile(query, dialect, parameters);
+    if (compiled) {
+      compiledParts.push(compiled.sql);
+    }
+  }
+
+  const glue = glueQuery.getGlue(dialect);
+
+  if (!glue) {
+    return null;
+  }
+
+  const compiledGlue = compile(glue, dialect, parameters);
+
+  if (!compiledGlue) {
+    return null;
+  }
+
+  return {
+    sql: compiledParts.join(compiledGlue.sql),
+    params: compiledGlue.params,
+  };
+};
+
+export const compileParameter = <T>(
+  paramValue: T,
+  dialect: Dialect,
   parameterBuilder: ParameterBuilder
-): string | CompiledQuery | null => {
-  if (paramValue instanceof Query) {
-    return compile(paramValue, parameterBuilder);
+): string | null => {
+  if (paramValue instanceof SourceQuery) {
+    return compile(paramValue, dialect, parameterBuilder)?.sql ?? null;
   }
 
   if (Array.isArray(paramValue)) {
-    // return compile(toArrayQuery(paramValue), parameterBuilder);
+    const values: string[] = [];
+
+    for (const param of paramValue) {
+      let parsed = compileParameter(param, dialect, parameterBuilder);
+
+      if (!parsed || (typeof parsed === "string" && parsed.trim() === "")) {
+        continue;
+      }
+
+      values.push(parsed);
+    }
+
+    if (values.length === 0) {
+      return null;
+    }
+
+    return dialect.glueArray(values);
   }
 
-  return ":" + parameterBuilder.toParameter(paramValue);
+  return dialect.getParameterName(parameterBuilder.toParameter(paramValue));
 };
