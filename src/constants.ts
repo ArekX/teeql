@@ -1,5 +1,3 @@
-import { Query } from "./query";
+import { PartsQuery } from "./query";
 
-export const emptyQuery = new Query([], []);
-
-export const commaGlue = ", ";
+export const emptyQuery = new PartsQuery([], []);
