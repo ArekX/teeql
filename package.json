@@ -15,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ArekX/teeql"
+    "url": "git+https://github.com/ArekX/teeql.git"
   },
   "homepage": "https://github.com/ArekX/teeql",
   "bugs": "https://github.com/ArekX/teeql/issues",
