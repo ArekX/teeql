@@ -1,4 +1,24 @@
 {
+  "name": "@arekx/teeql",
+  "version": "1.0.0",
+  "description": "Javascript/Typescript Query Builder using pure SQL",
+  "author": {
+    "name": "Aleksandar Panic"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "sql",
+    "query",
+    "builder",
+    "typescript",
+    "javascript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArekX/teeql"
+  },
+  "homepage": "https://github.com/ArekX/teeql",
+  "bugs": "https://github.com/ArekX/teeql/issues",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
