@@ -14,7 +14,7 @@
     limitations under the License.
  */
 
-import { ParameterBuilder } from "../src/parameter-builder";
+import { ParameterBuilder } from "../src";
 
 describe("ParameterBuilder", () => {
   it("should generate a parameter", () => {

@@ -4,3 +4,4 @@ export * from "./parameter-builder";
 export * from "./query";
 export * from "./compiler";
 export * from "./constants";
+export * from "./unsafe-operations";

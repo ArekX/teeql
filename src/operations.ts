@@ -20,6 +20,7 @@ import {
   CommaGlueQuery,
   GlueQuery,
   OrGlueQuery,
+  PrependQuery,
   SourceQuery,
   UnionGlueQuery,
 } from "./query";
@@ -115,3 +116,15 @@ export const match = (
 
   return emptyQuery;
 };
+
+/**
+ * Prepends a query to another query.
+ *
+ * If a query to prepend is empty, this will be a no-op.
+ *
+ * @param withQuery - The query to prepend to.
+ * @param query - The query to be prepended.
+ * @returns A new query with the `query` prepended to the `withQuery`.
+ */
+export const prepend = (withQuery: SourceQuery, query: SourceQuery) =>
+  new PrependQuery(withQuery, query);

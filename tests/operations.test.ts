@@ -23,16 +23,14 @@ import {
   when,
   match,
   OperatorValue,
-} from "../src/operations";
-import {
   GlueQuery,
   AndGlueQuery,
   OrGlueQuery,
   CommaGlueQuery,
   UnionGlueQuery,
   SourceQuery,
-} from "../src/query";
-import { emptyQuery } from "../src/constants";
+  emptyQuery,
+} from "../src";
 
 describe("operations", () => {
   describe("glue", () => {

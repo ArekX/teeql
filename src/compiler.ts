@@ -16,7 +16,13 @@
 
 import { Dialect, generalSqlDialect } from "./dialects";
 import { ParameterBuilder } from "./parameter-builder";
-import { GlueQuery, PartsQuery, SourceQuery } from "./query";
+import {
+  GlueQuery,
+  PartsQuery,
+  PrependQuery,
+  SourceQuery,
+  UnsafeNameQuery,
+} from "./query";
 
 /**
  * Represents a compiled query.
@@ -47,9 +53,13 @@ export const compile = (
   dialect: Dialect = generalSqlDialect
 ): CompiledQuery | null => {
   if (query instanceof PartsQuery) {
-    return compilePartsQuery(query, dialect, parameters);
+    return compilePartsQuery(query, parameters, dialect);
   } else if (query instanceof GlueQuery) {
-    return compileGlueQuery(query, dialect, parameters);
+    return compileGlueQuery(query, parameters, dialect);
+  } else if (query instanceof PrependQuery) {
+    return compilePrependQuery(query, parameters, dialect);
+  } else if (query instanceof UnsafeNameQuery) {
+    return compileUnsafeNameQuery(query, parameters, dialect);
   }
 
   return null;
@@ -57,8 +67,8 @@ export const compile = (
 
 const compilePartsQuery = (
   query: PartsQuery,
-  dialect: Dialect,
-  parameters: ParameterBuilder
+  parameters: ParameterBuilder,
+  dialect: Dialect
 ): CompiledQuery | null => {
   if (
     query.parts.length === 0 ||
@@ -92,8 +102,8 @@ const compilePartsQuery = (
 
 const compileGlueQuery = (
   glueQuery: GlueQuery,
-  dialect: Dialect,
-  parameters: ParameterBuilder
+  parameters: ParameterBuilder,
+  dialect: Dialect
 ): CompiledQuery | null => {
   const compiledParts = [];
   for (const query of glueQuery.queries) {
@@ -117,7 +127,36 @@ const compileGlueQuery = (
 
   return {
     sql: compiledParts.join(compiledGlue.sql),
-    params: compiledGlue.params,
+    params: dialect.toPreparedParameters(parameters),
+  };
+};
+
+const compilePrependQuery = (
+  query: PrependQuery,
+  parameters: ParameterBuilder,
+  dialect: Dialect
+): CompiledQuery | null => {
+  const compiledPrepend = compile(query.withQuery, parameters, dialect);
+  const compiledQuery = compile(query.query, parameters, dialect);
+
+  if (!compiledPrepend || !compiledQuery) {
+    return null;
+  }
+
+  return {
+    sql: compiledPrepend.sql + compiledQuery.sql,
+    params: dialect.toPreparedParameters(parameters),
+  };
+};
+
+const compileUnsafeNameQuery = (
+  query: UnsafeNameQuery,
+  parameters: ParameterBuilder,
+  dialect: Dialect
+): CompiledQuery | null => {
+  return {
+    sql: dialect.getSanitizedName(query.name),
+    params: dialect.toPreparedParameters(parameters),
   };
 };
 

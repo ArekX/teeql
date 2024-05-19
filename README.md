@@ -202,8 +202,7 @@ const query = compile(tql`
     tql`is_published = 1`,
     when(search.length > 0, tql`name LIKE ${`%${search}%`}`),
     when(activeOnly == 1, tql`active = 1`),
-  )}
-`)
+  )}`;
 ```
 
 This will produce all three filters are set:
@@ -215,6 +214,24 @@ This will produce all three filters are set:
     ':p_1': search // value from search with % and % on the sides.
   }
 }
+```
+
+## prepend
+
+Prepend operator prepends a source query with another query if that query is not empty. This is useful when
+you want for instance to apply `WHERE` when there is a filter set:
+
+```typescript
+const search = request.get('search'); // filter for search
+
+const query = compile(tql`
+  SELECT 
+    id, name, cost
+  FROM product
+  ${prepend(tql`WHERE `, glueAnd(
+    tql`is_published = 1`,
+    when(search.length > 0, tql`name LIKE ${`%${search}%`}`),
+  )})}`;
 ```
 
 ## match
@@ -242,28 +259,118 @@ const query = compile(tql`
 Match will run the function from the first index of each array and return the
 query if its true.
 
+So in case when active = 30, the result will 
+
+```typescript
+{
+  sql: "SELECT id, name FROM users WHERE status = 'deleted'",
+  params: {}
+}
+```
+
 **Note:** Match, like `when` can accept parameters either as a function returning a value or the value itself.
+
+# Unsafe operations
+
+Real world is never simple so it is not possible to create a perfect query builder for all possible use cases and make it fully secure from SQL operations. This is why these additional operations are added.
+
+Keep note that these operations allow strings to be added to the query so they allow for SQL injection to 
+happen. This means that these operations should be used only with full knowledge of their effects and with extreme caution not to let any user input to be passed to these methods in any way (either from another method
+or from database, etc.). These methods are prefixed with `unsafe` to denote that they are not fully secure.
+
+## unsafeRaw
+
+As the name says, this just passes whatever the string is passed to this directly into the query without
+any sanitization or processing:
+
+```typescript
+const username = request.get('username'); // The passed value in request here is "' OR 1=1 --"
+const query = compile(tql`SELECT id FROM users WHERE username = '${unsafeRaw(username)}' AND is_active = 1`);
+```
+
+Would output:
+
+```typescript
+{
+  sql: "SELECT id FROM users WHERE username = '' OR 1=1 -- AND is_active = 1", // Anything after -- is considered a comment in SQL, meaning the SQL injection happened here.
+  params: {} // No parameters since unsafeRaw was used.
+}
+```
+
+Usecase for this function would be for internal, queries which work on constants or some cases where you
+need SQL generated from a string and for whatever reason you cannot use `tql` to do it. These cases should be extremely rare so please make sure that you have a really good reason to use this method.
+
+## unsafeName
+
+This allows you to reference table names, column names and other database objects by their name. This method
+attempts sanitization and it is a bit safer than `unsafeRaw`. Sanitization is performed by the dialect object
+itself which in general case means that anything which is not a:
+- letter
+- number
+- dot
+- underscore
+
+Will be removed from a name:
+
+```typescript
+const tableName = tables.usersTable; // returns string "public.users"
+const columnName = userRecord.targetColumn; // returns "name!"
+const query = compile(tql`SELECT id, ${unsafeName(columnName)} FROM ${unsafeName(tableName)}`);
+```
+
+Will return:
+
+```typescript
+{
+  sql: "SELECT id, name FROM users", // "!" is removed due to sanitization
+  params: {}
+}
+```
+
+Usecase for this is similar to `unsafeRaw`, for internal use and not accepting user input, when you need to
+pick a column or a table based on some internal logic.
+
+Note: While this method will not (probably) not allow SQL injection directly if user input is used (due to sanitization) it will still allow user input to specify whatever valid string they want which can cause unintended consequences like reading data from a column or a table which you did not intend.
 
 # Advanced Usage
 For more complex use cases, teeql allows you to define your own parameter builder and SQL dialect. This can be useful for handling different SQL dialects or customizing how parameters are handled.
 
-Here's an example of how you might define a custom parameter builder and dialect:
+Here's an example of how you might define a custom parameter builder and custom dialect:
 
 ```typescript
-import { tql, compile, createDialect, ParameterBuilder } from 'teeql';
+import { tql, compile, createDialect, generalSqlDialect, ParameterBuilder } from 'teeql';
 
 const params: ParameterBuilder = new ParameterBuilder();
-const dialect = createDialect({
-  getParameterName: (p) => `:${p}`,
-  toPreparedparams: (p) => p.parameters,
-  glueArray: (p) => `(${p.join(", ")})`,
-});
+const dialect: Dialect = {
+  ...generalSqlDialect,
+  getParameterName: (p) => `@${p}`, // In this example the database requires prepared parameters to be @p_1, @p_2, etc.
+  toPreparedParameters: builder => {
+      const result = {};
+
+      for(const [key, value] of Object.entries(builder.parameters)) {
+        result["@" + key] = value;
+      }
+
+      return result;
+  };
+};
 
 const query = tql`SELECT * FROM users WHERE id IN ${[1, 2, 3]}`;
 const compiledQuery = compile(query, parameters, dialect);
 ```
 
-In this example, the getParameterName function in the dialect is used to prefix parameter names with a colon, and the glueArray function is used to join array parameters with commas.
+This would return:
+
+```typescript
+{
+  sql: "SELECT * FROM users WHERE id IN (@p_1, @p_2, @p_3)",
+  params: {
+     "@p_1": 1,
+     "@p_2": 2,
+     "@p_3": 3,
+  }
+}
+```
 
 # Testing
 This project uses Jest for testing. 

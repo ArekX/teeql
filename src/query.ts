@@ -104,6 +104,34 @@ export class UnionGlueQuery extends GlueQuery {
 }
 
 /**
+ * Represents a query that prepends another query to the existing query.
+ */
+export class PrependQuery extends SourceQuery {
+  constructor(
+    /**
+     * The query to prepend with.
+     */
+    public readonly withQuery: SourceQuery,
+    /**
+     * The existing query to prepend to.
+     */
+    public readonly query: SourceQuery
+  ) {
+    super();
+  }
+}
+
+/**
+ * Represents a query of a specific name for a table, column, etc.
+ * This will be sanitized by the dialect.
+ */
+export class UnsafeNameQuery extends SourceQuery {
+  constructor(public readonly name: string) {
+    super();
+  }
+}
+
+/**
  * Creates a new `PartsQuery` instance by combining the query parts and parameters.
  *
  * @param queryParts - The query parts as a `TemplateStringsArray`.

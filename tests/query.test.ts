@@ -22,7 +22,10 @@ import {
   OrGlueQuery,
   CommaGlueQuery,
   UnionGlueQuery,
-} from "../src/query";
+  prepend,
+  compile,
+  emptyQuery,
+} from "../src";
 import { createDialect } from "./helpers";
 
 describe("query", () => {
@@ -117,5 +120,29 @@ describe("UnionGlueQuery", () => {
     const dialect = createDialect({ getUnionGlue: () => unionGlue });
     expect(glueQuery.queries).toEqual([source]);
     expect(glueQuery.getGlue(dialect)).toBe(unionGlue);
+  });
+});
+
+describe("PrependQuery", () => {
+  it("should not do anything when source query is empty", () => {
+    const source = emptyQuery;
+    const toPrepend = tql`WHERE`;
+    const query = tql`SELECT * FROM users ${prepend(toPrepend, source)}`;
+    const dialect = createDialect();
+    expect(compile(query)).toEqual({
+      sql: "SELECT * FROM users ",
+      params: {},
+    });
+  });
+
+  it("should prepend properly", () => {
+    const source = tql`active = 1`;
+    const toPrepend = tql`WHERE `;
+    const query = tql`SELECT * FROM users ${prepend(toPrepend, source)}`;
+    const dialect = createDialect();
+    expect(compile(query)).toEqual({
+      sql: "SELECT * FROM users WHERE active = 1",
+      params: {},
+    });
   });
 });

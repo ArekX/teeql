@@ -59,4 +59,19 @@ describe("generalSqlDialect", () => {
       generalSqlDialect.getUnionGlue() as PartsQuery;
     expect(unionGlue.parts[0]).toBe(" UNION ");
   });
+
+  test("getSanitizedName", () => {
+    expect(generalSqlDialect.getSanitizedName("  name  ")).toBe("name");
+    expect(generalSqlDialect.getSanitizedName("  schema.table_name  ")).toBe(
+      "schema.table_name"
+    );
+    expect(
+      generalSqlDialect.getSanitizedName("  UPPERCASE.table_name1  ")
+    ).toBe("UPPERCASE.table_name1");
+    expect(
+      generalSqlDialect.getSanitizedName(
+        "  --UPPERCASE.table_name1 OR 1=1$#%@#%#%@# "
+      )
+    ).toBe("UPPERCASE.table_name1OR11");
+  });
 });

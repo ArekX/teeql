@@ -1,5 +1,5 @@
 /**
-     Copyright 2024 Aleksandar Panic
+    Copyright 2024 Aleksandar Panic
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
     limitations under the License.
  */
 
-import { Dialect } from "../src/dialects";
+import { Dialect } from "../src";
 
 export const createDialect = (overrides?: Partial<Dialect>): Dialect => ({
   getParameterName: jest.fn(),
@@ -24,5 +24,6 @@ export const createDialect = (overrides?: Partial<Dialect>): Dialect => ({
   getAndGlue: jest.fn(),
   getOrGlue: jest.fn(),
   getUnionGlue: jest.fn(),
+  getSanitizedName: jest.fn(),
   ...overrides,
 });

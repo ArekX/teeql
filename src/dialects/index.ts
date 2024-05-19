@@ -65,6 +65,14 @@ export interface Dialect {
    * @returns The "UNION" glue.
    */
   getUnionGlue(): SourceQuery;
+
+  /**
+   * Sanitize passed string of a table names, column names, etc.
+   *
+   * @param name - The name to sanitize.
+   * @returns The sanitized name.
+   */
+  getSanitizedName(name: string): string;
 }
 
 export * from "./general-sql";

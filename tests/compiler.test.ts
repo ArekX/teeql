@@ -14,12 +14,16 @@
     limitations under the License.
  */
 
-import { ParameterBuilder } from "../src/parameter-builder";
-import { SourceQuery, tql } from "../src/query";
-import { compile } from "../src/compiler";
+import {
+  ParameterBuilder,
+  SourceQuery,
+  tql,
+  compile,
+  glueAnd,
+  when,
+  emptyQuery,
+} from "../src";
 import { createDialect } from "./helpers";
-import { glueAnd, when } from "../src/operations";
-import { emptyQuery } from "../src/constants";
 
 describe("compile", () => {
   beforeEach(() => {

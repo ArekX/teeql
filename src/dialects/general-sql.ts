@@ -73,4 +73,21 @@ export const generalSqlDialect: Dialect = {
    * @returns The "UNION" glue string.
    */
   getUnionGlue: () => unionGlue,
+
+  /**
+   * Sanitize passed string of a table names, column names, etc.
+   *
+   * In this implementation, this function will REMOVE anything
+   * which is not following:
+   * - a letter
+   * - a number
+   * - an underscore
+   * - a dot
+   *
+   * @param name - The name to sanitize.
+   * @returns The sanitized name.
+   */
+  getSanitizedName: (name: string): string => {
+    return name.replace(/[^a-zA-Z0-9_\.]/g, "");
+  },
 };
