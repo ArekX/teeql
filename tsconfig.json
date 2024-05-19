@@ -1,17 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ES2017",                    
-    "module": "Node16",                  
-    "rootDir": ".",                        
+    "target": "ES2022",                    
+    "module": "CommonJS",
+    "moduleResolution": "Node",                  
     "declaration": true,                   
     "outDir": "./dist",                    
     "esModuleInterop": true,                
     "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
     "strict": true,       
     "noImplicitAny": true,
     "strictNullChecks": true,
     "skipLibCheck": true    
   },
+  "include": ["src"],
   "exclude": [
     "node_modules", 
     "dist", 
