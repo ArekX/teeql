@@ -52,14 +52,17 @@ const compiledQuery = compile(query, parameters, dialect);
 
 In this example, the getParameterName function in the dialect is used to prefix parameter names with a colon, and the glueArray function is used to join array parameters with commas.
 
-Testing
-This project uses Jest for testing. You can run the tests with the following command:
+# Testing
+This project uses Jest for testing. 
 
-Building
-To build the project, use the following command:
+You can run the tests with the following command: `npm test`
+To generate a coverage report run: `npm run coverage`
 
-Contributing
+# Building
+To build the project, use the following command: `npm run build`
+
+# Contributing
 Contributions are welcome! Please feel free to submit a pull request.
 
-License
-This project is licensed under the MIT License.
+# License
+This project is licensed under the [Apache 2.0 License](LICENSE)
