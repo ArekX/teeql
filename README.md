@@ -128,7 +128,26 @@ const query = compile(tql`
 `);
 ```
 
-# glue
+### Parameters vs functions
+
+Parameters passed to `when` can be values or functions returning those values. For
+performance and memory reasons it is useful to prefer functions over just returning
+the values directly:
+
+```typescript
+const active = 1;
+const queryUsingValues = compile(tql`SELECT id FROM users ${when(
+  active == 1, 
+  tql`WHERE active = 1` // this will always be generated here then only passed if active = 1
+)}`);
+
+const queryUsingFunctions = compile(tql`SELECT id FROM users ${when(
+  () => active == 1, 
+  () => tql`WHERE active = 1` // this will only be generated and passed when active = 1
+)}`);
+```
+
+## glue
 
 glue operator allows you to stictch two or more queries together, it is useful when
 you want to build list of columns, filters or union queries or just join multiple queries together.
@@ -164,6 +183,66 @@ There are specialized operators for common glue operations:
 * `glueOr` - Glues queries with ` OR `. Useful when building filters
 * `glueComma` - Glues queries with `, `. Useful when combining queries like columns or parameters.
 * `glueUnion` - Glues queries with ` UNION `. Useful when making union queries.
+
+Please note that `glue` can work together with `when` perfectly to only add things
+which are needed.
+
+Example using `glueAnd` when building filters:
+
+```typescript
+const search = request.get('search'); // filter for search
+const activeOnly = request.get('active_only'); // filter to show only active products
+
+const query = compile(tql`
+  SELECT 
+    id, name, cost
+  FROM product
+  WHERE
+  ${glueAnd(
+    tql`is_published = 1`,
+    when(search.length > 0, tql`name LIKE ${`%${search}%`}`),
+    when(activeOnly == 1, tql`active = 1`),
+  )}
+`)
+```
+
+This will produce all three filters are set:
+
+```typescript
+{
+  sql: "SELECT id, name, cost FROM product WHERE is_published = 1 AND name LIKE :p_1 AND active = 1", 
+  params: {
+    ':p_1': search // value from search with % and % on the sides.
+  }
+}
+```
+
+## match
+
+Match operator is similar to `when` except it accepts an array of parameters and returns the query on the first matched value:
+
+```typescript
+const STATE_ACTIVE = 10;
+const STATE_PENDING = 20;
+const STATE_DELETED = 30;
+const activeState = request.get('active_state');
+const query = compile(tql`
+  SELECT 
+    id, name
+  FROM users
+  WHERE
+  status = ${match(
+    [() => active == STATE_ACTIVE, () => tql`'active'`],
+    [() => active == STATE_PENDING, () => tql`'pending-activation'`],
+    [() => active == STATE_DELETED, () => tql`'deleted'`],
+  )}
+`)
+```
+
+Match will run the function from the first index of each array and return the
+query if its true.
+
+**Note:** Match, like `when` can accept parameters either as a function returning a value or the value itself.
 
 # Advanced Usage
 For more complex use cases, teeql allows you to define your own parameter builder and SQL dialect. This can be useful for handling different SQL dialects or customizing how parameters are handled.
