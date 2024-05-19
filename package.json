@@ -1,5 +1,5 @@
 {
-  "name": "@arekx/teeql",
+  "name": "@arekx/teeql-sql",
   "version": "1.0.0",
   "description": "Javascript/Typescript Query Builder using pure SQL",
   "author": "Aleksandar Panic",
