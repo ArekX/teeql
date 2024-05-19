@@ -8,26 +8,67 @@ import {
   UnionGlueQuery,
 } from "./query";
 
+/**
+ * Glues together a source query with a custom operator.
+ *
+ * @param glue - The source query to be used as the glue.
+ * @param queries - An array of source queries to be glued together.
+ * @returns A new `GlueQuery` object representing the glued queries.
+ */
 export const glue = (glue: SourceQuery, queries: SourceQuery[]) =>
   new GlueQuery(queries, glue);
 
+/**
+ * Glues queries together with an AND operator.
+ *
+ * @param conditions - The `SourceQuery` conditions to be glued together.
+ * @returns A new `AndGlueQuery` instance.
+ */
 export const glueAnd = (...conditions: SourceQuery[]) =>
   new AndGlueQuery(conditions);
 
+/**
+ * Glues queries together with an OR operator.
+ *
+ * @param conditions - The `SourceQuery` conditions to be glued together.
+ * @returns A new `AndGlueQuery` instance.
+ */
 export const glueOr = (...conditions: SourceQuery[]) =>
   new OrGlueQuery(conditions);
 
+/**
+ * Glues queries together with a comma
+ *
+ * @param conditions - The `SourceQuery` conditions to be glued together.
+ * @returns A new `AndGlueQuery` instance.
+ */
 export const glueComma = (...conditions: SourceQuery[]) =>
   new CommaGlueQuery(conditions);
 
+/**
+ * Glues queries together with an UNION operator.
+ *
+ * @param conditions - The `SourceQuery` conditions to be glued together.
+ * @returns A new `AndGlueQuery` instance.
+ */
 export const glueUnion = (...conditions: SourceQuery[]) =>
   new UnionGlueQuery(conditions);
 
-type OperatorValue<T> = T | (() => T);
+export type OperatorValue<T> = T | (() => T);
 
 const resolve = <T>(value: OperatorValue<T>) =>
   typeof value === "function" ? (value as () => T)() : value;
 
+/**
+ * Returns a conditional query based on the provided predicate.
+ *
+ * If the predicate is true the `trueQuery` is returned, otherwise the `falseQuery` is returned.
+ *
+ * @param predicate - The predicate to evaluate.
+ * @param trueQuery - The query to execute if the predicate is true.
+ * @param falseQuery - The query to execute if the predicate is false. Defaults to an empty query.
+ * @returns Returned query based on the predicate.
+ */
 export const when = (
   predicate: OperatorValue<boolean>,
   trueQuery: OperatorValue<SourceQuery>,
@@ -40,6 +81,13 @@ export const when = (
   return resolve<SourceQuery>(falseQuery);
 };
 
+/**
+ * Match through provided array of condition, checking first predicate and
+ * return a query on the first match.
+ *
+ * @param conditions - An array of condition-result pairs.
+ * @returns The matched SourceQuery.
+ */
 export const match = (
   ...conditions: [OperatorValue<boolean>, OperatorValue<SourceQuery>][]
 ): SourceQuery => {

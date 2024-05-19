@@ -1,16 +1,34 @@
-import { Dialect } from "./dialects";
+import { Dialect, generalSqlDialect } from "./dialects";
 import { ParameterBuilder } from "./parameter-builder";
 import { GlueQuery, PartsQuery, SourceQuery } from "./query";
 
+/**
+ * Represents a compiled query.
+ */
 export interface CompiledQuery {
+  /**
+   * The SQL query string.
+   */
   sql: string;
+  
+  /**
+   * The parameters used in the query.
+   */
   params: Record<string, unknown>;
 }
 
+/**
+ * Compiles a query into a compiled query object.
+ *
+ * @param query - The query to compile.
+ * @param parameters - The parameter builder to use for compiling the query.
+ * @param dialect - The SQL dialect to use for compiling the query.
+ * @returns The compiled query object, or null if the query cannot be compiled.
+ */
 export const compile = (
   query: SourceQuery,
-  dialect: Dialect,
-  parameters: ParameterBuilder
+  parameters: ParameterBuilder = new ParameterBuilder(),
+  dialect: Dialect = generalSqlDialect
 ): CompiledQuery | null => {
   if (query instanceof PartsQuery) {
     return compilePartsQuery(query, dialect, parameters);
@@ -26,13 +44,16 @@ const compilePartsQuery = (
   dialect: Dialect,
   parameters: ParameterBuilder
 ): CompiledQuery | null => {
-  if (query.parts.length === 0) {
+  if (
+    query.parts.length === 0 ||
+    (query.parts.length === 1 && query.parts[0] === "")
+  ) {
     return null;
   }
 
   const parts = [];
   for (let i = 0; i < query.parts.length; i++) {
-    query.parts.push(query.parts[i]);
+    parts.push(query.parts[i]);
 
     if (i >= query.params.length) {
       continue;
@@ -60,7 +81,7 @@ const compileGlueQuery = (
 ): CompiledQuery | null => {
   const compiledParts = [];
   for (const query of glueQuery.queries) {
-    const compiled = compile(query, dialect, parameters);
+    const compiled = compile(query, parameters, dialect);
     if (compiled) {
       compiledParts.push(compiled.sql);
     }
@@ -72,7 +93,7 @@ const compileGlueQuery = (
     return null;
   }
 
-  const compiledGlue = compile(glue, dialect, parameters);
+  const compiledGlue = compile(glue, parameters, dialect);
 
   if (!compiledGlue) {
     return null;
@@ -87,17 +108,17 @@ const compileGlueQuery = (
 export const compileParameter = <T>(
   paramValue: T,
   dialect: Dialect,
-  parameterBuilder: ParameterBuilder
+  parameters: ParameterBuilder
 ): string | null => {
   if (paramValue instanceof SourceQuery) {
-    return compile(paramValue, dialect, parameterBuilder)?.sql ?? null;
+    return compile(paramValue, parameters, dialect)?.sql ?? null;
   }
 
   if (Array.isArray(paramValue)) {
     const values: string[] = [];
 
     for (const param of paramValue) {
-      let parsed = compileParameter(param, dialect, parameterBuilder);
+      let parsed = compileParameter(param, dialect, parameters);
 
       if (!parsed || (typeof parsed === "string" && parsed.trim() === "")) {
         continue;
@@ -113,5 +134,5 @@ export const compileParameter = <T>(
     return dialect.glueArray(values);
   }
 
-  return dialect.getParameterName(parameterBuilder.toParameter(paramValue));
+  return dialect.getParameterName(parameters.toParameter(paramValue));
 };
