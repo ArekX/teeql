@@ -1,5 +1,9 @@
 {
   "name": "@arekx/teeql",
   "version": "1.0.0",
-  "exports": "./src/index.ts"
+  "exports": "./src/index.ts",
+  "publish": {
+    "include": ["LICENSE", "README.md", "src/**/*.ts"],
+    "exclude": ["tests", ".github"]
+  }
 }
