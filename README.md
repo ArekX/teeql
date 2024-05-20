@@ -68,6 +68,12 @@ Would result in:
 Because anything which is not a query created by `tql` is always treated as it is
 a parameter.
 
+# Installation
+
+## JSR
+
+Check https://jsr.io/@arekx/teeql to see installation commands for your runtime.
+
 # Basic Usage
 
 At its simplest, teeql can be used to construct and compile SQL queries using the `tql` template literal and the `compile` function. Here's an example:
