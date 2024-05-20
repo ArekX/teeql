@@ -1,4 +1,5 @@
-export * from "./dialects";
+export * from "./dialects/general-sql";
+export * from "./dialects/type";
 export * from "./operations";
 export * from "./parameter-builder";
 export * from "./query";

@@ -32,8 +32,10 @@ import {
  * @param queries - An array of source queries to be glued together.
  * @returns A new `GlueQuery` object representing the glued queries.
  */
-export const glue = (glue: SourceQuery, queries: SourceQuery[]) =>
-  new GlueQuery(queries, glue);
+export const glue: (glue: SourceQuery, queries: SourceQuery[]) => GlueQuery = (
+  glue: SourceQuery,
+  queries: SourceQuery[]
+) => new GlueQuery(queries, glue);
 
 /**
  * Glues queries together with an AND operator.
@@ -41,8 +43,9 @@ export const glue = (glue: SourceQuery, queries: SourceQuery[]) =>
  * @param conditions - The `SourceQuery` conditions to be glued together.
  * @returns A new `AndGlueQuery` instance.
  */
-export const glueAnd = (...conditions: SourceQuery[]) =>
-  new AndGlueQuery(conditions);
+export const glueAnd: (...conditions: SourceQuery[]) => AndGlueQuery = (
+  ...conditions: SourceQuery[]
+) => new AndGlueQuery(conditions);
 
 /**
  * Glues queries together with an OR operator.
@@ -50,8 +53,9 @@ export const glueAnd = (...conditions: SourceQuery[]) =>
  * @param conditions - The `SourceQuery` conditions to be glued together.
  * @returns A new `AndGlueQuery` instance.
  */
-export const glueOr = (...conditions: SourceQuery[]) =>
-  new OrGlueQuery(conditions);
+export const glueOr: (...conditions: SourceQuery[]) => OrGlueQuery = (
+  ...conditions: SourceQuery[]
+) => new OrGlueQuery(conditions);
 
 /**
  * Glues queries together with a comma
@@ -59,8 +63,9 @@ export const glueOr = (...conditions: SourceQuery[]) =>
  * @param conditions - The `SourceQuery` conditions to be glued together.
  * @returns A new `AndGlueQuery` instance.
  */
-export const glueComma = (...conditions: SourceQuery[]) =>
-  new CommaGlueQuery(conditions);
+export const glueComma: (...conditions: SourceQuery[]) => CommaGlueQuery = (
+  ...conditions: SourceQuery[]
+) => new CommaGlueQuery(conditions);
 
 /**
  * Glues queries together with an UNION operator.
@@ -68,8 +73,9 @@ export const glueComma = (...conditions: SourceQuery[]) =>
  * @param conditions - The `SourceQuery` conditions to be glued together.
  * @returns A new `AndGlueQuery` instance.
  */
-export const glueUnion = (...conditions: SourceQuery[]) =>
-  new UnionGlueQuery(conditions);
+export const glueUnion: (...conditions: SourceQuery[]) => UnionGlueQuery = (
+  ...conditions: SourceQuery[]
+) => new UnionGlueQuery(conditions);
 
 export type OperatorValue<T> = T | (() => T);
 
@@ -86,7 +92,11 @@ const resolve = <T>(value: OperatorValue<T>) =>
  * @param falseQuery - The query to execute if the predicate is false. Defaults to an empty query.
  * @returns Returned query based on the predicate.
  */
-export const when = (
+export const when: (
+  predicate: OperatorValue<boolean>,
+  trueQuery: OperatorValue<SourceQuery>,
+  falseQuery: OperatorValue<SourceQuery>
+) => SourceQuery = (
   predicate: OperatorValue<boolean>,
   trueQuery: OperatorValue<SourceQuery>,
   falseQuery: OperatorValue<SourceQuery> = emptyQuery
@@ -105,7 +115,9 @@ export const when = (
  * @param conditions - An array of condition-result pairs.
  * @returns The matched SourceQuery.
  */
-export const match = (
+export const match: (
+  ...conditions: [OperatorValue<boolean>, OperatorValue<SourceQuery>][]
+) => SourceQuery = (
   ...conditions: [OperatorValue<boolean>, OperatorValue<SourceQuery>][]
 ): SourceQuery => {
   for (const [predicate, resultValue] of conditions) {
@@ -126,5 +138,8 @@ export const match = (
  * @param query - The query to be prepended.
  * @returns A new query with the `query` prepended to the `withQuery`.
  */
-export const prepend = (withQuery: SourceQuery, query: SourceQuery) =>
+export const prepend: (
+  withQuery: SourceQuery,
+  query: SourceQuery
+) => PrependQuery = (withQuery: SourceQuery, query: SourceQuery) =>
   new PrependQuery(withQuery, query);

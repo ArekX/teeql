@@ -14,7 +14,8 @@
     limitations under the License.
  */
 
-import { Dialect, generalSqlDialect } from "./dialects";
+import { Dialect } from "./dialects/type";
+import { generalSqlDialect } from "./dialects/general-sql";
 import { ParameterBuilder } from "./parameter-builder";
 import {
   GlueQuery,

@@ -14,7 +14,7 @@
     limitations under the License.
  */
 
-import { Dialect } from ".";
+import { Dialect } from "./type";
 import { ParameterBuilder } from "../parameter-builder";
 import { tql } from "../query";
 

@@ -74,5 +74,3 @@ export interface Dialect {
    */
   getSanitizedName(name: string): string;
 }
-
-export * from "./general-sql";

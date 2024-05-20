@@ -14,7 +14,7 @@
     limitations under the License.
  */
 
-import { Dialect } from "./dialects";
+import { Dialect } from "./dialects/type";
 
 export class SourceQuery {}
 
@@ -44,7 +44,7 @@ export class GlueQuery extends SourceQuery {
    * @param dialect The dialect used for the query.
    * @returns The glue query.
    */
-  getGlue(_dialect: Dialect) {
+  getGlue(_dialect: Dialect): SourceQuery | null {
     return this.glue;
   }
 }
@@ -58,7 +58,7 @@ export class AndGlueQuery extends GlueQuery {
    * @param dialect The dialect to get the "AND" glue for.
    * @returns The "AND" glue for the specified dialect.
    */
-  getGlue(dialect: Dialect) {
+  getGlue(dialect: Dialect): SourceQuery {
     return dialect.getAndGlue();
   }
 }
@@ -71,7 +71,7 @@ export class OrGlueQuery extends GlueQuery {
    * @param dialect The dialect to get the glue operator for.
    * @returns The OR glue operator for the specified dialect.
    */
-  getGlue(dialect: Dialect) {
+  getGlue(dialect: Dialect): SourceQuery {
     return dialect.getOrGlue();
   }
 }
@@ -84,7 +84,7 @@ export class CommaGlueQuery extends GlueQuery {
    * @param dialect The dialect for which to get the glue.
    * @returns The comma glue for the specified dialect.
    */
-  getGlue(dialect: Dialect) {
+  getGlue(dialect: Dialect): SourceQuery {
     return dialect.getCommaGlue();
   }
 }
@@ -98,7 +98,7 @@ export class UnionGlueQuery extends GlueQuery {
    * @param dialect The dialect to get the glue for.
    * @returns The union glue for the specified dialect.
    */
-  getGlue(dialect: Dialect) {
+  getGlue(dialect: Dialect): SourceQuery {
     return dialect.getUnionGlue();
   }
 }
@@ -138,7 +138,10 @@ export class UnsafeNameQuery extends SourceQuery {
  * @param params - The parameters to be interpolated into the query.
  * @returns A new `PartsQuery` instance.
  */
-export const tql = (
+export const tql: (
+  queryParts: TemplateStringsArray,
+  ...params: any[]
+) => PartsQuery = (
   queryParts: TemplateStringsArray,
   ...params: any[]
 ): PartsQuery => new PartsQuery(queryParts as unknown as string[], params);

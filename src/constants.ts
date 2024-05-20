@@ -21,4 +21,4 @@ import { PartsQuery } from "./query";
  * @remarks
  * An empty query is a query that does not contain any parts.
  */
-export const emptyQuery = new PartsQuery([], []);
+export const emptyQuery: PartsQuery = new PartsQuery([], []);

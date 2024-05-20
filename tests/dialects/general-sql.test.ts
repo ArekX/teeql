@@ -14,9 +14,7 @@
     limitations under the License.
  */
 
-import { generalSqlDialect } from "../../src/dialects";
-import { ParameterBuilder } from "../../src/parameter-builder";
-import { PartsQuery } from "../../src/query";
+import { generalSqlDialect, ParameterBuilder, PartsQuery } from "../../src";
 
 describe("generalSqlDialect", () => {
   test("getParameterName", () => {

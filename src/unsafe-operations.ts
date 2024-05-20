@@ -25,8 +25,9 @@ import { UnsafeNameQuery, PartsQuery } from "./query";
  * @param unsafeRawQuery - The raw query string to execute.
  * @returns A new `PartsQuery` instance with the raw query.
  */
-export const unsafeRaw = (unsafeRawQuery: string) =>
-  new PartsQuery([unsafeRawQuery], []);
+export const unsafeRaw: (unsafeRawQuery: string) => PartsQuery = (
+  unsafeRawQuery: string
+) => new PartsQuery([unsafeRawQuery], []);
 
 /**
  * Returns a query part which represents a name of a table, column, etc.
@@ -44,4 +45,5 @@ export const unsafeRaw = (unsafeRawQuery: string) =>
  * @param name - The name to be used in the NameQuery.
  * @returns A new NameQuery object.
  */
-export const unsafeName = (name: string) => new UnsafeNameQuery(name);
+export const unsafeName: (name: string) => UnsafeNameQuery = (name: string) =>
+  new UnsafeNameQuery(name);
