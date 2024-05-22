@@ -78,7 +78,7 @@ Check https://jsr.io/@arekx/teeql to see installation commands for your runtime.
 
 At its simplest, teeql can be used to construct and compile SQL queries using the `tql` template literal and the `compile` function. Here's an example:
 
-```typescript
+```ts
 import { tql, compile } from 'teeql';
 
 const query = tql`SELECT * FROM users WHERE id = ${1}`;

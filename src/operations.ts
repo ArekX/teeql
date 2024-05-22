@@ -28,6 +28,32 @@ import {
 /**
  * Glues together a source query with a custom operator.
  *
+ *  Example:
+ * ```ts
+ * const columnsToInclude = [
+ *   tql`id`,
+ *   tql`name`,
+ *   tql`password`
+ * ];
+ * const query = compile(tql`
+ *   SELECT
+ *     ${glue(
+ *       tql` ,`,
+ *       columnsToInclude
+ *     )}
+ *   FROM
+ *     users
+ * `);
+ * ```
+ *
+ * Will return:
+ * ```ts
+ * {
+ *   sql: 'SELECT id, name, password FROM users',
+ *   params: {}
+ * }
+ * ```
+ *
  * @param glue - The source query to be used as the glue.
  * @param queries - An array of source queries to be glued together.
  * @returns A new `GlueQuery` object representing the glued queries.
@@ -86,6 +112,21 @@ const resolve = <T>(value: OperatorValue<T>) =>
  * Returns a conditional query based on the provided predicate.
  *
  * If the predicate is true the `trueQuery` is returned, otherwise the `falseQuery` is returned.
+ *
+ * Example:
+ *
+ * ```ts
+ * const productSearch = request.get('search') ?? null;
+ * const query = compile(tql`
+ *   SELECT id, name FROM product
+ *   WHERE
+ *     active = 1
+ *     ${when(productSearch, tql`AND name LIKE ${`%${productSearch}%`}`)}
+ * `);
+ * ```
+ *
+ * This will add `AND LIKE :p_1` (where `:p_1` is the `'%searchTerm%'`') to the compiled
+ * query only when productSearch is actually passed in the request.
  *
  * @param predicate - The predicate to evaluate.
  * @param trueQuery - The query to execute if the predicate is true.

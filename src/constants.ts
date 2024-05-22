@@ -18,7 +18,9 @@ import { PartsQuery } from "./query";
 
 /**
  * Represents an empty query.
+ *
  * @remarks
- * An empty query is a query that does not contain any parts.
+ * An empty query is a query that does not contain any parts. This is used by some of the
+ * operations to return an empty query when no parts are found or not needed.
  */
 export const emptyQuery: PartsQuery = new PartsQuery([], []);

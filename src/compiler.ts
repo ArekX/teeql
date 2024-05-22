@@ -43,6 +43,21 @@ export interface CompiledQuery {
 /**
  * Compiles a query into a compiled query object.
  *
+ * Example:
+ * ```ts
+ * import { tql, compile } from 'teeql';
+ *
+ * const query = tql`SELECT * FROM users WHERE id = ${1}`;
+ * const compiledQuery = compile(query);
+ *
+ * // Pass compiledQuery.sql and compiledQuery.params into your database driver
+ * // for example mysql2:
+ * connection.execute(compiledQuery.sql, compiledQuery.params, (err, rows) => {
+ *   // handle the result here.
+ * });
+ *
+ * ```
+ *
  * @param query - The query to compile.
  * @param parameters - The parameter builder to use for compiling the query.
  * @param dialect - The SQL dialect to use for compiling the query.
