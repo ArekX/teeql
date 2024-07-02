@@ -9,9 +9,7 @@
   "keywords": [
     "sql",
     "query",
-    "builder",
-    "typescript",
-    "javascript"
+    "builder"
   ],
   "repository": {
     "type": "git",

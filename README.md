@@ -47,7 +47,7 @@ created by `tql` it will allow it to be treated as a part of the query string, s
 
 ```typescript
 const subquery = tql`SELECT id FROM user_profile WHERE active = 1`;
-const maliciousUsername = "' OR 1=1"; // this would be a malicious exploit from user input.
+const maliciousUsername = "' --"; // this would be a malicious exploit from user input.
 const query = tql`SELECT id, username, password FROM users WHERE username = ${maliciousUsername} AND profile_id IN (${subquery})`;
 
 
@@ -60,7 +60,7 @@ Would result in:
 {
   sql: "SELECT id, username, password FROM users WHERE username = :p_1 AND AND profile_id IN (SELECT id FROM user_profile WHERE active = 1)",
   params: {
-     ':p_1': "' OR 1=1"
+     ':p_1': "' --"
   }
 }
 ```
@@ -290,7 +290,7 @@ As the name says, this just passes whatever the string is passed to this directl
 any sanitization or processing:
 
 ```typescript
-const username = request.get('username'); // The passed value in request here is "' OR 1=1 --"
+const username = request.get('username'); // The passed value in request here is "' --"
 const query = compile(tql`SELECT id FROM users WHERE username = '${unsafeRaw(username)}' AND is_active = 1`);
 ```
 
@@ -298,7 +298,7 @@ Would output:
 
 ```typescript
 {
-  sql: "SELECT id FROM users WHERE username = '' OR 1=1 -- AND is_active = 1", // Anything after -- is considered a comment in SQL, meaning the SQL injection happened here.
+  sql: "SELECT id FROM users WHERE username = '' -- AND is_active = 1", // Anything after -- is considered a comment in SQL, meaning the SQL injection happened here.
   params: {} // No parameters since unsafeRaw was used.
 }
 ```
